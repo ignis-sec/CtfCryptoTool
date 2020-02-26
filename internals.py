@@ -29,10 +29,13 @@ class CryptoAnalyser():
         self.anModuleFolder = analysisFolder
         self.crModuleFolder = cryptoFolder
         self.key = key
+        self.resultFound=True
 
 
-    def analyseCipher(self,cipher):
+    def analyseCipher(self,cipher, trace='cipher'):
+        # all the analysis results will be stored in this dictionary. All the decrypt forward-checks will check from this dictionary
         results = {}
+
         ### iterate and call each module
         print(f"{warn} Starting the analysis step.")
         for module in self.anModules:
@@ -44,39 +47,52 @@ class CryptoAnalyser():
 
         print(f"{warn} Analysis results:")
         print(results)
-        self.findDecipher(results, cipher)
 
-    def findDecipher(self,results, cipher):
+        # attempt decryption now that analysis is complete
+        self.findDecipher(results, cipher,trace)
+
+    def findDecipher(self,results, cipher,trace):
+        #iterate each module
         for module in self.crModules:
+            #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 
             if(not module.check(results)):
                 if(self.verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
                 continue
         
+            #if forward check passes, attempt to decode with the module
             try:
-                res = module.decode(cipher,self.key)
+                res = module.decrypt(cipher,self.key)
+                # module should return false if it successfully decrypts, but result looks like nonsense
                 if(not res):
                     if(self.verbosity>=2): print(f"{warn} Failed secondary check for {module.name}")
                 else:
                     if(self.plainMode):
+                        #passed all the checks, but still not the plaintext we were expecting
                         if(re.match(self.plain,res)):
                             print(f"{success_start}#######################################################{reset}")
                             print(f"{success_start}#####################POSSIBLE RESULT###################{reset}")
                             print(f"{success_start}#######################################################{reset}")
                             print(f"{success} {module.name} returned: {res}")
                             print(f"{success} Expected plaintext found. Stopping")
+                            print(f"{success} trace: {trace}-->plain")
+                            self.resultFound=True
                             return
                         else:
-                            print(f"{warn_start}#######################################################{reset}")
-                            print(f"{warn_start}#####################POSSIBLE RESULT###################{reset}")
-                            print(f"{warn_start}#######################################################{reset}")
+                            if(self.verbosity):
+                                print(f"{warn_start}#######################################################{reset}")
+                                print(f"{warn_start}#####################POSSIBLE RESULT###################{reset}")
+                                print(f"{warn_start}#######################################################{reset}")
                             print(f"{success} {module.name} returned: {res}")
                             print(f"{warn} Missing expected plaintext. Continuing.")
-                            self.analyseCipher(res)
+                            self.analyseCipher(res,trace+"-->" + module.name)
+            #most likely module.decrypt failed
             except Exception as e:
                 print(e)
                 if(self.verbosity): print(f"{fail} Failed to use {module.name}")
+        if(not self.resultFound): 
+            print(f"{info} Out of ideas ¯\\_(ツ)_/¯")
 
-
+    #dynamic load from analysis folder
     def loadAnalysisModules(self):
         self.anModuleFiles = os.listdir(self.anModuleFolder)
         for moduleFile in self.anModuleFiles:
@@ -93,10 +109,11 @@ class CryptoAnalyser():
                 
                 #add it to the list to iterate later
                 self.anModules.append(module)
-            except:
+            except Exception as e:
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
+                print(e)
         
-
+    #dynamic load from crypto folder
     def loadCryptoModules(self):
         self.crModuleFiles = os.listdir(self.crModuleFolder)
         for moduleFile in self.crModuleFiles:
@@ -113,8 +130,9 @@ class CryptoAnalyser():
                 
                 #add it to the list to iterate later
                 self.crModules.append(module)
-            except:
+            except Exception as e:
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
+                print(e)
 
 
 

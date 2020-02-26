@@ -24,16 +24,16 @@ charsets = [
     r"[a-zA-Z0-9]",     #alphanumeric
     r"[a-zA-Z0-9 ]",    #alphanumeric with space
     r"[A-Za-z0-9+/=]",  #b64
-    r"[!-u]"#,          #b85
-    #r"[0x00-0xff]"     #bytes
+    r"[!-u]",           #b85
+    r"[ -~]"            #all printables
 ]
 
-def analyse(resultDict, text):
+def analyse(result, text):
     for cset in charsets:
         expr = r"^" + cset + r"+$"
         if(re.match(expr,text)):
-            resultDict["charset"] = cset
+            result["charset"] = cset
             return True
     
-    resultDict["charset"] = [0x00-0xff]
+    result["charset"] = [0x00-0xff]
     return False

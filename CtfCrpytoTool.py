@@ -31,13 +31,8 @@ except:
 
 
 #pretty output headers
-fail="[\033[91m+\033[0m]"
-success="[\033[92m+\033[0m]"
-warn="[\033[93m+\033[0m]"
 info="[\033[94m+\033[0m]"
-warn_start = "\033[93m"
-success_start = "\033[92m"
-reset = "\033[0m"
+
 
 #get all module files from ./analysis and ./crypto
 selfdir = os.path.dirname(os.path.realpath(__file__))
