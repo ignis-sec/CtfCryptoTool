@@ -1,18 +1,29 @@
 import argparse
 import os
 import importlib.machinery
+import re
 
 #configure arguement parser
 parser = argparse.ArgumentParser()
 parser.add_argument("-v","--verbose", action="count", help="set verbosity level")
 parser.add_argument("-k","--key", action="store_true", help="use a key")
 parser.add_argument("-b","--brute", action="store_true", help="attempt brute force on the text")
+parser.add_argument("-p","--plain", help="a part of a plaintext to search for (required for recursive checks)")
 parser.add_argument("ciphertext", help="ciphertext to analyse")
 
 #set from parser
 args = parser.parse_args() 
-cipher = args.ciphertext
+ciphertext = args.ciphertext
 bKey = args.key
+plainMode = False
+if(args.plain):
+    plainMode = True
+    plain = args.plain
+try:
+    verbosity = int(args.verbose)
+except:
+    verbosity=0
+
 
 #pretty output headers
 fail="[\033[91m+\033[0m]"
@@ -33,7 +44,7 @@ anModules = []
 crModules = []
 
 
-print(f"{info} Importing analysis modules...")
+if(verbosity): print(f"{info} Importing analysis modules...")
 #Dynamically load analysis module files
 for moduleFile in anModuleFiles:
     #ignore non .py files
@@ -45,14 +56,14 @@ for moduleFile in anModuleFiles:
     try:
         #import module from the module folder
         module = importlib.machinery.SourceFileLoader(moduleName, os.path.join(anModuleFolder, moduleFile)).load_module()
-        print(f'\t{success} Imported module: "{module.name}"')
+        if(verbosity): print(f'\t{success} Imported module: "{module.name}"')
         
         #add it to the list to iterate later
         anModules.append(module)
     except:
-        print(f"{fail} Failed to import analysis module at {moduleFile}")
+        print(f"\t{fail} Failed to import analysis module at {moduleFile}")
 
-print(f"{info} Importing crypto modules...")
+if(verbosity): print(f"{info} Importing crypto modules...")
 #Dynamically load analysis module files
 for moduleFile in crModuleFiles:
     #ignore non .py files
@@ -64,44 +75,58 @@ for moduleFile in crModuleFiles:
     try:
         #import module from the module folder
         module = importlib.machinery.SourceFileLoader(moduleName, os.path.join(crModuleFolder, moduleFile)).load_module()
-        print(f'\t{success} Imported module: "{module.name}"')
+        if(verbosity): print(f'\t{success} Imported module: "{module.name}"')
         
         #add it to the list to iterate later
         crModules.append(module)
     except:
-        print(f"{fail} Failed to import analysis module at {moduleFile}")
+        print(f"\t{fail} Failed to import analysis module at {moduleFile}")
 
 
 
-
-
-results = {}
-### iterate and call each module
-print(f"{warn} Starting the analysis step.")
-for module in anModules:
-    res = module.analyse(results,cipher)
-    if(res):
-        print(module.success)
-    else:
-        print(module.fail)
-
-print(f"{warn} Analysis results:")
-print(results)
-
-
-for module in crModules:
-    if(not module.check(results)):
-        print(f"{warn} Failed primary check for {module.name}")
-        continue
-    
-    try:
-        res = module.decode(cipher)
-        if(not res):
-            print(f"{warn} Failed secondary check for {module.name}")
+def analyseCipher(cipher):
+    results = {}
+    ### iterate and call each module
+    print(f"{warn} Starting the analysis step.")
+    for module in anModules:
+        res = module.analyse(results,cipher)
+        if(res):
+            if(verbosity>=2): print(module.success)
         else:
-            print("#######################################################")
-            print("#####################POSSIBLE RESULT###################")
-            print("#######################################################")
-            print(f"{success} {module.name} returned: {res}")
-    except:
-        print(f"{fail} Failed to use {module.name}")
+            if(verbosity): print(module.fail)
+
+    print(f"{warn} Analysis results:")
+    print(results)
+
+    findDecipher(results, cipher)
+
+
+def findDecipher(results, cipher):
+    for module in crModules:
+        if(not module.check(results)):
+            if(verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
+            continue
+    
+        try:
+            res = module.decode(cipher)
+            if(not res):
+                if(verbosity>=2): print(f"{warn} Failed secondary check for {module.name}")
+            else:
+                print("#######################################################")
+                print("#####################POSSIBLE RESULT###################")
+                print("#######################################################")
+                print(f"{success} {module.name} returned: {res}")
+                if(plainMode):
+                    if(re.match(plain,res)):
+                        print(f"{success} Expected plaintext found. Stopping")
+                        return
+                    else:
+                        print(f"{warn} Missing expected plaintext. Continuing.")
+                        analyseCipher(res)
+        except Exception as e:
+            print(e)
+            if(verbosity): print(f"{fail} Failed to use {module.name}")
+
+
+
+analyseCipher(ciphertext)
