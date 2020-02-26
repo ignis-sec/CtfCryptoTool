@@ -13,4 +13,4 @@ fail = f"{fail}"
 def analyse(result, text):
     result["cipherLength"]=len(text)
     result["cipherLengthNOWS"]=len(text.replace(' ',''))
-    return False
+    return True

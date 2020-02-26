@@ -16,7 +16,7 @@ def check(result):
     return True
 
 
-def decrypt(text, key=''):
+def decrypt(text, **kwargs):
     text = text.replace(' ', '')
     binaryStream = int(text,2)
     res = binaryStream.to_bytes((binaryStream.bit_length() + 7) // 8, 'big')

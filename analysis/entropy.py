@@ -29,4 +29,4 @@ def analyse(result, text):
     ent = ent*-1
     result["alphabet"]=alphabet
     result["entropy"] = ent
-    return False
+    return True
