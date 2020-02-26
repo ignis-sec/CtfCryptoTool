@@ -10,7 +10,7 @@ def check(results):
         return False
 
 
-def decode(text):
+def decode(text, key=''):
     res = base64.b64decode(text).decode()
     #print(res)
     if(re.match(r'^[ -~]*$',res)):
