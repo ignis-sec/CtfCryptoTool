@@ -2,7 +2,7 @@
 name = "Decimal"
 
 ## forward check compatibility
-def check(result):
+def check(result,**kwargs):
     if("charset" in result):
         if(not result["charset"]==r"[0-9 ]"):
             return False

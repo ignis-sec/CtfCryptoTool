@@ -12,9 +12,8 @@ warn_start = "\033[93m"
 success_start = "\033[92m"
 reset = "\033[0m"
 
-
 class CryptoAnalyser():
-    def __init__(self,verbosity, analysisFolder, cryptoFolder,key='',plain=''):
+    def __init__(self,verbosity, analysisFolder, cryptoFolder, depth=10, key='',plain=''):
         if(verbosity):
             self.verbosity=verbosity
         else:
@@ -29,13 +28,19 @@ class CryptoAnalyser():
         self.anModuleFolder = analysisFolder
         self.crModuleFolder = cryptoFolder
         self.key = key
-        self.resultFound=True
+        self.resultFound=False
+        self.depth=depth
+        self.counter=0
 
 
-    def analyseCipher(self,cipher, trace='cipher'):
+    def analyseCipher(self,cipher, depth, trace='cipher'):
+        if(self.resultFound):
+            return
         # all the analysis results will be stored in this dictionary. All the decrypt forward-checks will check from this dictionary
         results = {}
-
+        if(depth==self.depth):
+            print(f"{fail} Depth limit reached.")
+            return
         ### iterate and call each module
         print(f"{warn} Starting the analysis step.")
         for module in self.anModules:
@@ -49,13 +54,18 @@ class CryptoAnalyser():
         print(results)
 
         # attempt decryption now that analysis is complete
-        self.findDecipher(results, cipher,trace)
+        self.findDecipher(results, cipher,trace,depth)
 
-    def findDecipher(self,results, cipher,trace):
+    def findDecipher(self,results, cipher,trace,depth):
+        self.counter+=1
+        if(self.resultFound):
+            return
         #iterate each module
         for module in self.crModules:
+            if(self.resultFound):
+                return
             #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 
-            if(not module.check(results)):
+            if(not module.check(results,key=self.key)):
                 if(self.verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
                 continue
         
@@ -74,7 +84,8 @@ class CryptoAnalyser():
                             print(f"{success_start}#######################################################{reset}")
                             print(f"{success} {module.name} returned: {res}")
                             print(f"{success} Expected plaintext found. Stopping")
-                            print(f"{success} trace: {trace}-->plain")
+                            print(f"{success} trace: {trace}-->{module.name}-->plain")
+                            print(f"{info} total iterations:{self.counter}")
                             self.resultFound=True
                             return
                         else:
@@ -84,7 +95,7 @@ class CryptoAnalyser():
                                 print(f"{warn_start}#######################################################{reset}")
                             print(f"{success} {module.name} returned: {res}")
                             print(f"{warn} Missing expected plaintext. Continuing.")
-                            self.analyseCipher(res,trace+"-->" + module.name)
+                            self.analyseCipher(res,depth+1,trace+"-->" + module.name)
             #most likely module.decrypt failed
             except Exception as e:
                 print(e)

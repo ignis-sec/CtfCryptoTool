@@ -3,7 +3,7 @@ import binascii
 import re
 name = "Hex"
 
-def check(result):
+def check(result,**kwargs):
     if("charset" in result):
         if(not result["charset"]==r"[0-9a-fA-F ]" and not result["charset"]==r"[0-9 ]"):
             return False

@@ -5,7 +5,7 @@ import re
 name = "Binary"
 
 ## forward check compatibility
-def check(result):
+def check(result,**kwargs):
     if("alphabet" in result):
         if(not len(result["alphabet"])==2 and not len(result["alphabet"])==3):
             return False
