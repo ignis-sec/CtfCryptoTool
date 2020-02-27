@@ -113,7 +113,7 @@ module.analyse(results,cipher,ignore=self.ignore, shared=self.sharedData)
 
 ## Crypto Modules
 
-Crypto modules are dynamically loaded from the `./crypto` folder.
+Crypto modules are dynamically loaded from the `./crypto` folder, and `./crypto/helpers` subfolder.
 
 After the analysis step, tool iterates over all the crypto modules, and calls their check function.
 

@@ -60,5 +60,8 @@ analyser.loadAnalysisModules()
 if(verbosity): print(f"{info} Importing crypto modules...")
 analyser.loadCryptoModules()
 
+if(verbosity): print(f"{info} Importing helper modules...")
+analyser.loadHelperModules()
+
 #start analysis
 analyser.analyseCipher(ciphertext,0)

@@ -193,6 +193,29 @@ class CryptoAnalyser():
 
         self.crModules.sort(key=lambda x:x.priority)
 
+    def loadHelperModules(self):
+        helperPath = os.path.join(self.crModuleFolder,"helpers/")
+        self.hpModuleFiles = os.listdir(helperPath)
+        for moduleFile in self.hpModuleFiles:
+            #ignore non .py files
+            if not moduleFile.endswith(".py"):
+                continue
+
+            #strip file extension
+            moduleName = moduleFile.replace('.py', '')
+            try:
+                #import module from the module folder
+                module = importlib.machinery.SourceFileLoader(moduleName, os.path.join(helperPath, moduleFile)).load_module()
+                if(self.verbosity): print(f'\t{success} Imported module: "{module.name}"')
+                
+                #add it to the list to iterate later
+                self.crModules.append(module)
+            except Exception as e:
+                print(f"\t{fail} Failed to import analysis module at {moduleFile}")
+                print(e)
+
+        self.crModules.sort(key=lambda x:x.priority)
+
 
 
 
