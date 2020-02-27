@@ -43,5 +43,6 @@ def decrypt(text, key, **kwargs):
         else:
             base=ord('A')
         res+=chr((( modinv(int(key[0]), 26)*(ord(c) - base - int(key[1]))) % 26) + base)
-    
-    return res
+    if(re.match(r"[ -~]",res)):
+        return res
+    else: return False

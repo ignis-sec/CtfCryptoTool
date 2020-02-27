@@ -10,7 +10,7 @@ fail = f"{fail}"
 
 
 
-def analyse(result, text):
+def analyse(result, text, **kwargs):
     result["cipherLength"]=len(text)
     result["cipherLengthNOWS"]=len(text.replace(' ',''))
     return True

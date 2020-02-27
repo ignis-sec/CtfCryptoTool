@@ -10,6 +10,7 @@ parser.add_argument("-b","--brute", action="store_true", help="attempt brute for
 parser.add_argument("-p","--plain", help="a part of a plaintext to search for (required for recursive checks)")
 parser.add_argument("-f","--file", action="store_true",help="give a file instead of cli text")
 parser.add_argument("-d","--depth", help="depth limit for recursive search")
+parser.add_argument("-i","--ignore", help="(regex) characters to ignore during charset analysis")
 parser.add_argument("ciphertext", help="ciphertext to analyse")
 
 #set from parser
@@ -34,6 +35,9 @@ depth = 10
 if(args.depth):
     depth=int(args.depth)
 
+ignore = 10
+if(args.ignore):
+    ignore=args.ignore
 
 #pretty output headers
 info="[\033[94m+\033[0m]"
@@ -47,7 +51,7 @@ anModuleFolder = os.path.join(selfdir, "analysis")
 crModuleFolder = os.path.join(selfdir, "crypto")
 
 
-analyser = CryptoAnalyser(args.verbose, anModuleFolder, crModuleFolder, depth,key,args.plain)
+analyser = CryptoAnalyser(args.verbose, anModuleFolder, crModuleFolder, depth,key,args.plain,ignore)
 
 
 if(verbosity): print(f"{info} Importing analysis modules...")

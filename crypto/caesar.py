@@ -5,10 +5,18 @@ import re
 
 
 ## forward check compatibility
-def check(result,**kwargs):
-    #if("charset" in result):
-    #    if(not result["charset"]==r"[a-z]" and not result["charset"]==r"[a-z ]" and not result["charset"]==r"[A-Z ]" and not result["charset"]==r"[A-Z]"):
-    #        return False
+def check(result,text,plain,**kwargs):
+    #check if offset of all the characters is same
+    ##check if it has extra characters caesar cant use
+    if("charsetIndex" in result):
+        if(result["charsetIndex"]>=7):
+            return False
+    
+    #check if shift is consistent
+    offset = ord(text[0]) - ord(plain[0])
+    for c in range(3):
+        if(offset!=(ord(text[c]) - ord(plain[c]))):
+            return False
     return True
 
 

@@ -13,7 +13,7 @@ fail = f"{fail} Something went wrong on entropy analysis"
 
 
 
-def analyse(result, text):
+def analyse(result, text, **kwargs):
     freqList = []
     text = list(text)
     alphabet = list(set(text))

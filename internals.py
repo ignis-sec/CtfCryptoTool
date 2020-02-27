@@ -13,7 +13,7 @@ success_start = "\033[92m"
 reset = "\033[0m"
 
 class CryptoAnalyser():
-    def __init__(self,verbosity, analysisFolder, cryptoFolder, depth=10, key='',plain=''):
+    def __init__(self,verbosity, analysisFolder, cryptoFolder, depth=10, key='',plain='',ignore=''):
         if(verbosity):
             self.verbosity=verbosity
         else:
@@ -31,6 +31,7 @@ class CryptoAnalyser():
         self.resultFound=False
         self.depth=depth
         self.counter=0
+        self.ignore=ignore
 
 
     def analyseCipher(self,cipher, depth, trace='cipher'):
@@ -38,13 +39,15 @@ class CryptoAnalyser():
             return
         # all the analysis results will be stored in this dictionary. All the decrypt forward-checks will check from this dictionary
         results = {}
+        results["key"]=self.key
+        results["plain"]=self.plain
         if(depth==self.depth):
             print(f"{fail} Depth limit reached.")
             return
         ### iterate and call each module
         print(f"{warn} Starting the analysis step.")
         for module in self.anModules:
-            res = module.analyse(results,cipher)
+            res = module.analyse(results,cipher,ignore=self.ignore)
             if(res):
                 if(self.verbosity>=2): print(module.success)
             else:
@@ -65,7 +68,7 @@ class CryptoAnalyser():
             if(self.resultFound):
                 return
             #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 
-            if(not module.check(results,key=self.key)):
+            if(not module.check(results,key=self.key,plain=self.plain,text=cipher)):
                 if(self.verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
                 continue
         
