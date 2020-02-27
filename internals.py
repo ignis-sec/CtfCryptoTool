@@ -2,7 +2,6 @@ import os
 import importlib.machinery
 import re
 
-
 #pretty output headers
 fail="[\033[91m+\033[0m]"
 success="[\033[92m+\033[0m]"
@@ -13,6 +12,8 @@ success_start = "\033[92m"
 reset = "\033[0m"
 
 class CryptoAnalyser():
+    ''' Analysis class for CtfCryptoTool.
+    '''
     def __init__(self,verbosity, analysisFolder, cryptoFolder, depth=10, key='',plain='',ignore=''):
         if(verbosity):
             self.verbosity=verbosity
@@ -32,22 +33,40 @@ class CryptoAnalyser():
         self.depth=depth
         self.counter=0
         self.ignore=ignore
+                
+        #shared data is used for passing data not related to the cipher to other modules. 
+        #Modules should not update the shared data for every round, they should initialize it once.
+        self.sharedData = {}
 
 
     def analyseCipher(self,cipher, depth, trace='cipher'):
+        ''' Iterate over analysis modules on the ciphertext, then call the findDecipher function.
+            
+            cipher: ciphertext to analyse
+
+            depth: current depth, will be cutoff at self.depth
+
+            trace: used decryption methods so far on the stack
+
+            Every result from the analysis modules should be added to the results dictionary.
+            
+        '''
         if(self.resultFound):
             return
         # all the analysis results will be stored in this dictionary. All the decrypt forward-checks will check from this dictionary
         results = {}
         results["key"]=self.key
         results["plain"]=self.plain
+        
+        #cutoff
         if(depth==self.depth):
             print(f"{fail} Depth limit reached.")
             return
-        ### iterate and call each module
+
+        ### iterate and call each modules analysis function
         print(f"{warn} Starting the analysis step.")
         for module in self.anModules:
-            res = module.analyse(results,cipher,ignore=self.ignore)
+            res = module.analyse(results,cipher,ignore=self.ignore, shared=self.sharedData)
             if(res):
                 if(self.verbosity>=2): print(module.success)
             else:
@@ -59,29 +78,46 @@ class CryptoAnalyser():
         # attempt decryption now that analysis is complete
         self.findDecipher(results, cipher,trace,depth)
 
+
     def findDecipher(self,results, cipher,trace,depth):
+        ''' Iterate over crypto modules, and call their check function first. If check returns true, attempt decryption.
+            
+            results: result dictionary
+            
+            cipher: ciphertext
+
+            trace: used decryption methods so far on the stack
+
+            depth: current depth, will be cutoff at self.depth
+        '''
+
+        #iteration counter, for performance checking
         self.counter+=1
+
+        #if result is already found, don't traverse decryption tree further.
         if(self.resultFound):
             return
+
         #iterate each module
         for module in self.crModules:
             if(self.resultFound):
                 return
             #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 
-            if(not module.check(results,key=self.key,plain=self.plain,text=cipher)):
+            if(not module.check(results,key=self.key,plain=self.plain,text=cipher, shared=self.sharedData)):
                 if(self.verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
                 continue
         
             #if forward check passes, attempt to decode with the module
             try:
-                res = module.decrypt(cipher,key=self.key,plain=self.plain)
-                # module should return false if it successfully decrypts, but result looks like nonsense
+                res = module.decrypt(cipher,key=self.key,plain=self.plain, shared=self.sharedData)
+                # module should return false if it successfully decrypts, but result looks like nonsense.
                 if(not res):
                     if(self.verbosity>=2): print(f"{warn} Failed secondary check for {module.name}")
                 else:
                     if(self.plainMode):
                         #passed all the checks, but still not the plaintext we were expecting
                         if(re.match(self.plain,res)):
+                            #Matching expected flag format, finalise
                             print(f"{success_start}#######################################################{reset}")
                             print(f"{success_start}#####################POSSIBLE RESULT###################{reset}")
                             print(f"{success_start}#######################################################{reset}")
@@ -92,6 +128,8 @@ class CryptoAnalyser():
                             self.resultFound=True
                             return
                         else:
+                            #looks like a successfull decryption, but not matching the flag format. Output, but continue.
+                            #It might be an intermediate step, or flag without proper formatting.
                             if(self.verbosity):
                                 print(f"{warn_start}#######################################################{reset}")
                                 print(f"{warn_start}#####################POSSIBLE RESULT###################{reset}")

@@ -3,13 +3,12 @@ name = "caesar"
 
 import re
 
-
 ## forward check compatibility
-def check(result,text,plain,**kwargs):
+def check(result,text,plain,shared,**kwargs):
     #check if offset of all the characters is same
-    ##check if it has extra characters caesar cant use
-    if("charsetIndex" in result):
-        if(result["charsetIndex"]>=7):
+    #check if it has extra characters caesar cant use
+    if("charsets" in shared):
+        if(result["charsetIndex"]>=shared["charsets"].index(r"[a-zA-Z ]")):
             return False
     
     #check if shift is consistent
@@ -21,7 +20,6 @@ def check(result,text,plain,**kwargs):
 
 
 def decrypt(text, plain, **kwargs):
-
     offset = ord(text[0])-ord(plain[0])
     res = ''
     for c in text:

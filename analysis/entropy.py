@@ -1,7 +1,7 @@
 
 import math
 
-
+#Run shannon entropy analysis on the text
 
 name = "Shannon Entropy"
 

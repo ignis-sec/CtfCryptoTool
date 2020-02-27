@@ -39,28 +39,26 @@ ignore = 10
 if(args.ignore):
     ignore=args.ignore
 
+
+
+
 #pretty output headers
 info="[\033[94m+\033[0m]"
 
 
 #get all module files from ./analysis and ./crypto
 selfdir = os.path.dirname(os.path.realpath(__file__))
-
-#Initialize module lists for dynamic loader
 anModuleFolder = os.path.join(selfdir, "analysis")
 crModuleFolder = os.path.join(selfdir, "crypto")
 
-
+#Init analyser class
 analyser = CryptoAnalyser(args.verbose, anModuleFolder, crModuleFolder, depth,key,args.plain,ignore)
-
 
 if(verbosity): print(f"{info} Importing analysis modules...")
 analyser.loadAnalysisModules()
 
-
 if(verbosity): print(f"{info} Importing crypto modules...")
 analyser.loadCryptoModules()
-
 
 #start analysis
 analyser.analyseCipher(ciphertext,0)
