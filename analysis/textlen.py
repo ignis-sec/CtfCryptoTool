@@ -2,7 +2,6 @@
 
 #write ciphertext length and ciphertext length without whitespaces to the result dictionary
 
-
 name = "Ciphertext Length"
 
 fail="[\033[91m+\033[0m]"

@@ -12,15 +12,15 @@ def check(result,text,plain,shared,**kwargs):
             return False
     
     #check if shift is consistent
-    offset = ord(text[0]) - ord(plain[0])
+    offset = ord(plain[0]) - ord(text[0])
     for c in range(3):
-        if(offset!=(ord(text[c]) - ord(plain[c]))):
+        if(offset!=(ord(plain[c]) - ord(text[c]))):
             return False
     return True
 
 
 def decrypt(text, plain, **kwargs):
-    offset = ord(text[0])-ord(plain[0])
+    offset = ord(plain[0])-ord(text[0])
     res = ''
     for c in text:
         if(c.islower()):

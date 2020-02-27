@@ -137,6 +137,9 @@ class CryptoAnalyser():
                             print(f"{success} {module.name} returned: {res}")
                             print(f"{warn} Missing expected plaintext. Continuing.")
                             self.analyseCipher(res,depth+1,trace+"-->" + module.name)
+                    else:
+                        #no plain given
+                        print(f"{success} {module.name} returned: {res}")
             #most likely module.decrypt failed
             except Exception as e:
                 print(e)

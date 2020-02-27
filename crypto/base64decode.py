@@ -17,7 +17,7 @@ def check(result,**kwargs):
 
 def decrypt(text, **kwargs):
     res = base64.b64decode(text).decode()
-    #print(res)
+    print(res)
     if(re.match(r'^[ -~]*$',res)):
         return res
     else:

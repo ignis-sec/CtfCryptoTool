@@ -21,6 +21,10 @@ def modinv(a, m):
 
 ## forward check compatibility
 def check(result,key,**kwargs):
+    if(not key):
+        return False
+    if("," not in key):
+        return False
     if(len(key.split(","))!=2):
         return False
     #if("charset" in result):

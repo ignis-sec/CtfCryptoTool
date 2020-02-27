@@ -35,7 +35,7 @@ depth = 10
 if(args.depth):
     depth=int(args.depth)
 
-ignore = 10
+ignore = ''
 if(args.ignore):
     ignore=args.ignore
 

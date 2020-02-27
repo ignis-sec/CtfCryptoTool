@@ -17,7 +17,7 @@ def check(result,**kwargs):
 
 def decrypt(text, **kwargs):
     text = text.replace(' ', '')
-    res = binascii.unhexlify(text).decode("ansi")
+    res = binascii.unhexlify(text).decode()
     #print(res)
     if(re.match(r'^[ -~]*$',res)):
         return res

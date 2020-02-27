@@ -34,8 +34,7 @@ charsets = [
 def analyse(result, text, ignore, shared, **kwargs):
     #initialize shared object
     if("charsets" not in shared): shared["charsets"] = charsets
-    
-    text = re.sub(ignore, '', text)
+    if(ignore!=''): text = re.sub(ignore, '', text)
     counter=0
     for cset in charsets:
         expr = r"^" + cset + r"+$"
