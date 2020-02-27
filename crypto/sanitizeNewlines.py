@@ -12,4 +12,4 @@ def check(result,text,plain,shared,**kwargs):
 
 
 def decrypt(text, plain, **kwargs):
-    return text.replace('\n', '')
+    return text.replace('\n', ' ')

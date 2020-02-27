@@ -9,6 +9,7 @@ warn="[\033[93m+\033[0m]"
 info="[\033[94m+\033[0m]"
 warn_start = "\033[93m"
 success_start = "\033[92m"
+info_start = "\033[94m"
 reset = "\033[0m"
 
 
@@ -65,7 +66,7 @@ class CryptoAnalyser():
             return
 
         ### iterate and call each modules analysis function
-        print(f"{warn} Starting the analysis step.")
+        if(self.verbosity): print(f"{warn} Starting the analysis step.")
         for module in self.anModules:
             res = module.analyse(results,cipher,ignore=self.ignore, shared=self.sharedData)
             if(res):
@@ -73,7 +74,7 @@ class CryptoAnalyser():
             else:
                 if(self.verbosity): print(module.fail)
 
-        print(f"{warn} Analysis results:")
+        if(self.verbosity): print(f"{warn} Analysis results:")
         print(results)
 
         # attempt decryption now that analysis is complete
@@ -104,7 +105,7 @@ class CryptoAnalyser():
             if(self.resultFound):
                 return
             #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 
-            if(not module.check(results,key=self.key,plain=self.plain,text=cipher, shared=self.sharedData)):
+            if(not module.check(results,key=self.key,plain=self.plain,text=cipher, shared=self.sharedData, trace=trace)):
                 if(self.verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
                 continue
         
@@ -124,7 +125,7 @@ class CryptoAnalyser():
                             print(f"{success_start}#######################################################{reset}")
                             print(f"{success} {module.name} returned: {res}")
                             print(f"{success} Expected plaintext found. Stopping")
-                            print(f"{success} trace: {trace}-->{module.name}-->plain")
+                            print(f"{success} trace: {success_start}{trace}-->{module.name}-->plain{reset}")
                             print(f"{info} total iterations:{self.counter}")
                             self.resultFound=True
                             return
@@ -135,8 +136,9 @@ class CryptoAnalyser():
                                 print(f"{warn_start}#######################################################{reset}")
                                 print(f"{warn_start}#####################POSSIBLE RESULT###################{reset}")
                                 print(f"{warn_start}#######################################################{reset}")
+                            print(f"{info_start}Current stack: {trace}-->{module.name}{reset}")
                             print(f"{success} {module.name} returned: {res}")
-                            print(f"{warn} Missing expected plaintext. Continuing.")
+                            if(self.verbosity): print(f"{warn} Missing expected plaintext. Continuing.")
                             self.analyseCipher(res,depth+1,trace+"-->" + module.name)
                     else:
                         #no plain given

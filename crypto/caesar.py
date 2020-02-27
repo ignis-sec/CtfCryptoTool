@@ -1,6 +1,6 @@
 
 name = "caesar"
-priority=50
+priority=25
 
 import re
 
@@ -8,9 +8,9 @@ import re
 def check(result,text,plain,shared,**kwargs):
     #check if offset of all the characters is same
     #check if it has extra characters caesar cant use
-    if("charsets" in shared):
-        if(result["charsetIndex"]>=shared["charsets"].index(r"[a-zA-Z ]")):
-            return False
+    #if("charsets" in shared):
+    #    if(result["charsetIndex"]>=shared["charsets"].index(r"[a-zA-Z ]")):
+    #        return False
     
     #check if shift is consistent
     offset = ord(plain[0]) - ord(text[0])

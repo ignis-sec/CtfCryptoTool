@@ -22,7 +22,7 @@ def modinv(a, m):
         return x % m 
 
 ## forward check compatibility
-def check(result,key,**kwargs):
+def check(result,key,shared,trace,**kwargs):
     if(not key):
         return False
     if("," not in key):
@@ -32,10 +32,16 @@ def check(result,key,**kwargs):
     #if("charset" in result):
     #    if(not result["charset"]==r"[a-z]" and not result["charset"]==r"[a-z ]" and not result["charset"]==r"[A-Z ]" and not result["charset"]==r"[A-Z]"):
     #        return False
+    #if("affineCycleFlag" in shared and shared["affineCycleFlag"]):
+        #shared["affineCycleFlag"]=False
+    #    return False
+
+    if("Affine" in trace):
+        return False
     return True
 
 
-def decrypt(text, key, **kwargs):
+def decrypt(text, key,shared, **kwargs):
     key = key.split(",")
     res =''
 
@@ -49,6 +55,8 @@ def decrypt(text, key, **kwargs):
         else:
             base=ord('A')
         res+=chr((( modinv(int(key[0]), 26)*(ord(c) - base - int(key[1]))) % 26) + base)
+    
+    shared["affineCycleFlag"]=True
     if(re.match(r"[ -~]",res)):
         return res
     else: return False

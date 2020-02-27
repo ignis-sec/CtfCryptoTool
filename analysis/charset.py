@@ -14,6 +14,7 @@ fail = f"{fail} Failed to find a matching charset"
 #Order assumes higher index is more general, while lower indexes are less constraining
 #Only the match with lowest index will be returned
 charsets = [
+    r"[.\- ]",
     r"[a-z]",           #0lowercase
     r"[a-z ]",          #1lowercase with space
     r"[a-z \-_]",       #2lowercase with space and dashes
