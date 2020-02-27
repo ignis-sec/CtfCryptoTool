@@ -2,6 +2,7 @@
 import binascii
 import re
 name = "Hex"
+priority=50
 
 def check(result,**kwargs):
     if("charset" in result):

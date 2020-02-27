@@ -1,5 +1,6 @@
 
 name = "Decimal"
+priority=50
 
 ## forward check compatibility
 def check(result,**kwargs):

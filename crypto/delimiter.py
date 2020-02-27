@@ -5,6 +5,7 @@ name="swapDelimiter"
 
 # Convert delimiter to standard, whitespace
 
+priority=20
 
 def check(result,text,**kwargs):
     if("cipherLength" in result):

@@ -2,6 +2,7 @@
 import base64
 import re
 name = "Base64"
+priority=50
 
 def check(result,**kwargs):
     if("charset" in result):

@@ -3,7 +3,7 @@ import base64
 import re
 
 name = "Binary"
-
+priority=50
 ## forward check compatibility
 def check(result,**kwargs):
     if("alphabet" in result):

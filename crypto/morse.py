@@ -1,5 +1,6 @@
 
 name="Morse"
+priority=40
 
 morse = {
 '.-':	    'A',

@@ -11,6 +11,7 @@ warn_start = "\033[93m"
 success_start = "\033[92m"
 reset = "\033[0m"
 
+
 class CryptoAnalyser():
     ''' Analysis class for CtfCryptoTool.
     '''
@@ -168,6 +169,7 @@ class CryptoAnalyser():
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
                 print(e)
         
+        
     #dynamic load from crypto folder
     def loadCryptoModules(self):
         self.crModuleFiles = os.listdir(self.crModuleFolder)
@@ -188,6 +190,8 @@ class CryptoAnalyser():
             except Exception as e:
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
                 print(e)
+
+        self.crModules.sort(key=lambda x:x.priority)
 
 
 
