@@ -126,6 +126,7 @@ Very minimal crypto module example:
 import binascii
 import re
 name = "Hex"
+priority=50
 
 def check(result,**kwargs):
     if("charset" in result):
@@ -154,6 +155,10 @@ def decrypt(text, **kwargs):
 
 #### Name:
 Name of the module to be printed during for the trace output
+
+#### Priority:
+Crypto modules are called in order which is sorted on their priority value. Lower priority values algorithms will be called as a last resort.
+Default is 50.
 
 ---
 
