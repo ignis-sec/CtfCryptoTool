@@ -13,6 +13,10 @@ def check(result,**kwargs):
     if("cipherLengthNOWS" in result):
         if(result["cipherLengthNOWS"]%8):
             return False
+    
+    if("entropy" in result):
+        if(result["entropy"]<=1.28 or result["entropy"]>=1.39):
+            return False
     return True
 
 
