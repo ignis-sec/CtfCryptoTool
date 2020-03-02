@@ -170,7 +170,7 @@ class CryptoAnalyser():
         
             #if forward check passes, attempt to decode with the module
             try:
-                res = module.decrypt(cipher,key=self.key,plain=self.plain, shared=self.sharedData)
+                res = module.decrypt(cipher,key=self.key,plain=self.plain, shared=self.sharedData, result=results)
                 # module should return false if it successfully decrypts, but result looks like nonsense.
                 if(not res):
                     if(self.verbosity>=2): print(f"{warn} Failed secondary check for {module.name}")

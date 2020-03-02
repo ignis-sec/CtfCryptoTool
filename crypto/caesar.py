@@ -4,7 +4,7 @@ import re
 
 name = "caesar"
 priority=25
-prequisites=["plain"]
+prequisites=["shiftKey"]
 
 ## forward check compatibility
 def check(result,text,plain,shared,**kwargs):
@@ -15,24 +15,24 @@ def check(result,text,plain,shared,**kwargs):
     #        return False
     
     #check if shift is consistent
-    offset = ord(plain[0]) - ord(text[0])
-    for c in range(3):
-        if(offset!=(ord(plain[c]) - ord(text[c]))):
-            return False
+    #offset = ord(plain[0]) - ord(text[0])
+    #for c in range(3):
+    #    if(offset!=(ord(plain[c]) - ord(text[c]))):
+    #        return False
     return True
 
 
-def decrypt(text, plain, **kwargs):
+def decrypt(text, plain,result, **kwargs):
     offset = ord(plain[0])-ord(text[0])
     res = ''
+    key = result["shiftKey"]
     for c in text:
+        if(not c.isalpha()):
+            res+=c
+            continue
         if(c.islower()):
             base=ord('a')
         else:
             base=ord('A')
-        if(not re.match(r"[a-zA-Z]", c)):
-            res+=c
-            continue
-        res += chr(base + (ord(c)-base + offset)%26)
-
+        res += chr(base + (ord(c)-base+key)%26)
     return res
