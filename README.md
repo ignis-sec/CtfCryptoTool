@@ -87,6 +87,12 @@ Name of the module to be printed during the load process
 #### Success
 Will be printed when analysis is completed in verbose mode
 
+#### Share (optional)
+A list of strings, holding variable names to be shared. Given variables will be added to the sharedData dictionary.
+
+#### Prequisites (optional)
+A list of strings, holding which values should be in the result dictionary for this module to be used. If any of the key values is not in the result dictionary, module will be called after all the remaining modules are called.
+
 #### Fail
 Will be printed if module throws an exception.
 
@@ -156,9 +162,14 @@ def decrypt(text, **kwargs):
 #### Name:
 Name of the module to be printed during for the trace output
 
-#### Priority:
+#### Priority (optional):
 Crypto modules are called in order which is sorted on their priority value. Lower priority values algorithms will be called as a last resort.
 Default is 50.
+
+
+#### Prequisites (optional):
+
+Required key values in result dictionary. If the key values are not found in the dictionary, module wont be called.
 
 ---
 
