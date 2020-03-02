@@ -4,10 +4,11 @@ import re
 name = "Base64"
 priority=50
 
+prequisite=["charset"]
+
 def check(result,**kwargs):
-    if("charset" in result):
-        if(not result["charset"]==r"[A-Za-z0-9+/=]" and not result["charset"]==r"[a-zA-Z0-9]"):
-            return False
+    if(not result["charset"]==r"[A-Za-z0-9+/=]" and not result["charset"]==r"[a-zA-Z0-9]"):
+        return False
     
     if("entropy" in result):
         if(result["entropy"]<=2.0 or result["entropy"]>=5):
@@ -18,7 +19,4 @@ def check(result,**kwargs):
 
 def decrypt(text, **kwargs):
     res = base64.b64decode(text).decode()
-    if(re.match(r'^[\t\n -~]*$',res)):
-        return res
-    else:
-        return False
+    return res

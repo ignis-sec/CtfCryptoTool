@@ -269,7 +269,7 @@ class CryptoAnalyser():
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
                 print(e)
 
-        self.crModules.sort(key=lambda x:x.priority)
+        self.crModules.sort(key=lambda x:x.priority, reverse=True)
 
 
 
@@ -298,7 +298,7 @@ class CryptoAnalyser():
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
                 print(e)
 
-        self.crModules.sort(key=lambda x:x.priority)
+        self.crModules.sort(key=lambda x:x.priority, reverse=True)
 
 
 

@@ -6,7 +6,7 @@ fail="[\033[91m+\033[0m]"
 success="[\033[92m+\033[0m]"
 
 success = f"{success} Found a consistent shift"
-fail = f"{fail} No consistent shift found."
+fail = f"{fail} No consistent shift47 variation found."
 
 prequisites=["plain"]
 
