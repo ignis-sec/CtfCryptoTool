@@ -179,16 +179,18 @@ class CryptoAnalyser():
                         #passed all the checks, but still not the plaintext we were expecting
                         if(re.match(self.plain,res)):
                             #Matching expected flag format, finalise
-                            print(f"{success_start}#######################################################{reset}")
-                            print(f"{success_start}#####################POSSIBLE RESULT###################{reset}")
-                            print(f"{success_start}#######################################################{reset}")
-                            print(f"{success} {module.name} returned: {res}")
+                            if(self.verbosity>=3):
+                                print(f"{success_start}#######################################################{reset}")
+                                print(f"{success_start}#####################POSSIBLE RESULT###################{reset}")
+                                print(f"{success_start}#######################################################{reset}")
+                            print(f"{success_start}Current stack: {trace}-->{module.name}-->plain{reset}")
+                            print(f"{success_start}Stack result:{reset} {res}")
                             print(f"{success} Expected plaintext found. Stopping")
-                            print(f"{success} trace: {success_start}{trace}-->{module.name}-->plain{reset}")
                             print(f"{info} total iterations:{self.counter}")
-                            print(f"{warn} Some of your dependecies are missing, and following modules were ignored:")
-                            for module in self.removedModules:
-                                print(f"\t{module.name}")
+                            if(len(self.removedModules)):
+                                print(f"{warn} Some of your dependecies are missing, and following modules were ignored:")
+                                for module in self.removedModules:
+                                    print(f"\t{module.name}")
                             self.resultFound=True
                             return
                         else:
@@ -209,8 +211,8 @@ class CryptoAnalyser():
             except Exception as e:
                 print(e)
                 if(self.verbosity): print(f"{fail} Failed to use {module.name}")
-        if(not self.resultFound): 
-            print(f"{info} Out of ideas ¯\\_(ツ)_/¯")
+        if(not self.resultFound and self.plainMode): 
+            print(f"{info} Stack is out of ideas ¯\\_(ツ)_/¯")
 
 
 
