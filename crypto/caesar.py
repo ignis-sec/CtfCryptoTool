@@ -1,8 +1,10 @@
 
-name = "caesar"
-priority=25
 
 import re
+
+name = "caesar"
+priority=25
+prequisites=["plain"]
 
 ## forward check compatibility
 def check(result,text,plain,shared,**kwargs):

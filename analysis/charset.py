@@ -32,9 +32,10 @@ charsets = [
     r"[\t -~]"          #14all printables
 ]
 
+share=["charsets"]
+
 def analyse(result, text, ignore, shared, **kwargs):
-    #initialize shared object
-    if("charsets" not in shared): shared["charsets"] = charsets
+    
     if(ignore!=''): text = re.sub(ignore, '', text)
     counter=0
     for cset in charsets:

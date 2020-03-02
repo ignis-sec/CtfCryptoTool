@@ -13,6 +13,20 @@ info_start = "\033[94m"
 reset = "\033[0m"
 
 
+#check if a module is pending dependecies
+def checkPrequisites(module,results,verbosity):
+    bIsUnmet=False
+    if(hasattr(module,"prequisites")):
+        for dep in module.prequisites:
+            if dep not in results:
+                if(verbosity>=2):
+                    print(f"{warn} Unmet dependency {dep} for {module.name}")
+                bIsUnmet=True
+    return bIsUnmet
+
+
+
+
 class CryptoAnalyser():
     ''' Analysis class for CtfCryptoTool.
     '''
@@ -35,6 +49,7 @@ class CryptoAnalyser():
         self.depth=depth
         self.counter=0
         self.ignore=ignore
+        self.removedModules=[]
                 
         #shared data is used for passing data not related to the cipher to other modules. 
         #Modules should not update the shared data for every round, they should initialize it once.
@@ -57,28 +72,68 @@ class CryptoAnalyser():
             return
         # all the analysis results will be stored in this dictionary. All the decrypt forward-checks will check from this dictionary
         results = {}
-        results["key"]=self.key
-        results["plain"]=self.plain
+        if(self.key): results["key"]=self.key
+        if(self.plain): results["plain"]=self.plain
         
         #cutoff
         if(depth==self.depth):
             print(f"{fail} Depth limit reached.")
             return
 
-        ### iterate and call each modules analysis function
-        if(self.verbosity): print(f"{warn} Starting the analysis step.")
-        for module in self.anModules:
-            res = module.analyse(results,cipher,ignore=self.ignore, shared=self.sharedData)
-            if(res):
-                if(self.verbosity>=2): print(module.success)
-            else:
-                if(self.verbosity): print(module.fail)
+        #modules with unmet prequisites
+        modulePending = []
 
-        if(self.verbosity): print(f"{warn} Analysis results:")
-        print(results)
+        modulePending.extend(self.anModules)
+        if(self.verbosity): print(f"{warn} Starting the analysis step.")
+        
+        
+        while(len(modulePending)):
+            numPending = len(modulePending)
+            if(self.verbosity>=3):
+                print(f"{numPending} modules pending.")
+            ### iterate and call each modules analysis function
+            for module in modulePending:
+
+                #check if all module dependecies are met
+                bIsUnmet=checkPrequisites(module,results,self.verbosity)
+                
+                #if there are unmet prequisites, don't run the module
+                if(bIsUnmet): continue
+                else: modulePending.remove(module)
+                
+                #check analysis success
+                res = module.analyse(results,cipher,ignore=self.ignore, shared=self.sharedData)
+                if(res):
+                    if(self.verbosity>=2): print(module.success)
+                else:
+                    if(self.verbosity): print(module.fail)   
+
+                #if module has shared objects, import them to the shared bin
+                if(hasattr(module,"share")):
+                    for obj in module.share:
+                        if(obj not in self.sharedData): self.sharedData[obj] = getattr(module,obj)
+
+            #if number of pending modules is the same, there is a missing dependency, or a deadlock. Stop the analysis here.
+            if(numPending==len(modulePending)):
+                #dependency loop, cant unstuck
+                print(f"{fail} Following modules had unmet prequisites and is removed from the module list:")
+                for module in modulePending:
+                    print(f"\t{module.name}")
+                    self.anModules.remove(module)
+                    self.removedModules.append(module)
+                break
+
+        
+        if(self.verbosity): 
+            print(f"{warn} Analysis results:")
+            print(results)
 
         # attempt decryption now that analysis is complete
         self.findDecipher(results, cipher,trace,depth)
+
+
+
+
 
 
     def findDecipher(self,results, cipher,trace,depth):
@@ -104,6 +159,10 @@ class CryptoAnalyser():
         for module in self.crModules:
             if(self.resultFound):
                 return
+
+            bIsUnmet=checkPrequisites(module,results,self.verbosity)
+            if(bIsUnmet): continue
+            
             #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 
             if(not module.check(results,key=self.key,plain=self.plain,text=cipher, shared=self.sharedData, trace=trace)):
                 if(self.verbosity>=2): print(f"{warn} Failed primary check for {module.name}")
@@ -127,17 +186,20 @@ class CryptoAnalyser():
                             print(f"{success} Expected plaintext found. Stopping")
                             print(f"{success} trace: {success_start}{trace}-->{module.name}-->plain{reset}")
                             print(f"{info} total iterations:{self.counter}")
+                            print(f"{warn} Some of your dependecies are missing, and following modules were ignored:")
+                            for module in self.removedModules:
+                                print(f"\t{module.name}")
                             self.resultFound=True
                             return
                         else:
                             #looks like a successfull decryption, but not matching the flag format. Output, but continue.
                             #It might be an intermediate step, or flag without proper formatting.
-                            if(self.verbosity):
+                            if(self.verbosity>=3):
                                 print(f"{warn_start}#######################################################{reset}")
                                 print(f"{warn_start}#####################POSSIBLE RESULT###################{reset}")
                                 print(f"{warn_start}#######################################################{reset}")
                             print(f"{info_start}Current stack: {trace}-->{module.name}{reset}")
-                            print(f"{success} {module.name} returned: {res}")
+                            print(f"{info_start}Stack result:{reset} {res}")
                             if(self.verbosity): print(f"{warn} Missing expected plaintext. Continuing.")
                             self.analyseCipher(res,depth+1,trace+"-->" + module.name)
                     else:
@@ -149,6 +211,12 @@ class CryptoAnalyser():
                 if(self.verbosity): print(f"{fail} Failed to use {module.name}")
         if(not self.resultFound): 
             print(f"{info} Out of ideas ¯\\_(ツ)_/¯")
+
+
+
+
+
+
 
     #dynamic load from analysis folder
     def loadAnalysisModules(self):
@@ -171,7 +239,13 @@ class CryptoAnalyser():
                 print(f"\t{fail} Failed to import analysis module at {moduleFile}")
                 print(e)
         
-        
+
+
+
+
+
+
+
     #dynamic load from crypto folder
     def loadCryptoModules(self):
         self.crModuleFiles = os.listdir(self.crModuleFolder)
@@ -194,6 +268,12 @@ class CryptoAnalyser():
                 print(e)
 
         self.crModules.sort(key=lambda x:x.priority)
+
+
+
+
+
+
 
     def loadHelperModules(self):
         helperPath = os.path.join(self.crModuleFolder,"helpers/")
