@@ -4,6 +4,7 @@ import re
 name = "Affine"
 
 priority=10
+prequisites=["affineKey"]
 
 def egcd(a, b): 
     x,y, u,v = 0,1, 1,0
@@ -23,25 +24,13 @@ def modinv(a, m):
 
 ## forward check compatibility
 def check(result,key,shared,trace,**kwargs):
-    if(not key):
-        return False
-    if("," not in key):
-        return False
-    if(len(key.split(","))!=2):
-        return False
-    #if("charset" in result):
-    #    if(not result["charset"]==r"[a-z]" and not result["charset"]==r"[a-z ]" and not result["charset"]==r"[A-Z ]" and not result["charset"]==r"[A-Z]"):
-    #        return False
-    #if("affineCycleFlag" in shared and shared["affineCycleFlag"]):
-        #shared["affineCycleFlag"]=False
-    #    return False
-
     if("Affine" in trace):
         return False
     return True
 
 
-def decrypt(text, key,shared, **kwargs):
+def decrypt(text, key,shared,result, **kwargs):
+    key = result["affineKey"]
     key = key.split(",")
     res =''
 

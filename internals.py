@@ -14,13 +14,16 @@ reset = "\033[0m"
 
 
 #check if a module is pending dependecies
-def checkPrequisites(module,results,verbosity):
+def checkPrequisites(module,results,shared,verbosity):
     bIsUnmet=False
     if(hasattr(module,"prequisites")):
         for dep in module.prequisites:
-            if dep not in results:
+            if dep not in results and dep not in shared:
                 if(verbosity>=2):
                     print(f"{warn} Unmet dependency {dep} for {module.name}")
+                    if(verbosity>=3):
+                        print(shared)
+                        print(results)
                 bIsUnmet=True
     return bIsUnmet
 
@@ -95,7 +98,7 @@ class CryptoAnalyser():
             for module in modulePending:
 
                 #check if all module dependecies are met
-                bIsUnmet=checkPrequisites(module,results,self.verbosity)
+                bIsUnmet=checkPrequisites(module,results,self.sharedData,self.verbosity)
                 
                 #if there are unmet prequisites, don't run the module
                 if(bIsUnmet): continue
@@ -160,7 +163,7 @@ class CryptoAnalyser():
             if(self.resultFound):
                 return
 
-            bIsUnmet=checkPrequisites(module,results,self.verbosity)
+            bIsUnmet=checkPrequisites(module,results,self.sharedData,self.verbosity)
             if(bIsUnmet): continue
             
             #forward check for each encryption depending on our analysis. Don't bother if it doesn't pass the forward checks. 

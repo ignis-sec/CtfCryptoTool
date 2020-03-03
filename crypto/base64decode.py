@@ -4,9 +4,9 @@ import re
 name = "Base64"
 priority=50
 
-prequisite=["charset"]
+prequisites=["charset"]
 
-def check(result,**kwargs):
+def check(result,shared,**kwargs):
     if(not result["charset"]==r"[A-Za-z0-9+/=]" and not result["charset"]==r"[a-zA-Z0-9]"):
         return False
     

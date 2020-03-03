@@ -9,6 +9,7 @@ success = f"{success} Found a consistent shift"
 fail = f"{fail} No consistent shift found."
 
 prequisites=["plain"]
+share=["getShift"]
 
 def getShift(c1,c2):
     if(not c1.isalpha() or not c2.isalpha()):

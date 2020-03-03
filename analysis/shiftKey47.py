@@ -9,9 +9,9 @@ success = f"{success} Found a consistent shift"
 fail = f"{fail} No consistent shift47 variation found."
 
 prequisites=["plain"]
+share=["getShift47"]
 
-
-def getShift(c1,c2):
+def getShift47(c1,c2):
     base=ord('!')
     c1 = ord(c1) - base
     c2 = ord(c2) - base
@@ -19,9 +19,9 @@ def getShift(c1,c2):
 
 def analyse(result, text, **kwargs):
     plain = result["plain"]
-    key = getShift(plain[0],text[0])
+    key = getShift47(plain[0],text[0])
     for i in range(len(plain)):
-        if(getShift(plain[i],text[i])!=key):
+        if(getShift47(plain[i],text[i])!=key):
             return False
     result["shiftKey47"] = key
     return True
