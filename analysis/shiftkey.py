@@ -25,7 +25,8 @@ def analyse(result, text, **kwargs):
     plain = result["plain"]
     key = getShift(plain[0],text[0])
     for i in range(len(plain)):
-        if(getShift(plain[i],text[i])!=key):
+        sh = getShift(plain[i],text[i])
+        if(sh!=key and sh!=-1):
             return False
     if(key==-1):
         return False

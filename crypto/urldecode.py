@@ -7,8 +7,6 @@ import re
 
 ## forward check compatibility
 def check(result,text,plain,shared,**kwargs):
-    
-    print(text)
     if(re.search("\\%[0-9a-fA-F]{2}",text)):
         return True
 
